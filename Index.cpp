@@ -35,8 +35,8 @@ bitmapper_bs_iter refGenLength_2_bit;
 
 //_rg_name_l  *_ih_refGenName=NULL;
 
-
-
+// 没有用到，废弃了？
+// 取seq的前WINDOW_SIZE位进行运算，转化为unsigned int，有非ACGT字符时候返回4294967295(-1)
 unsigned int hashVal(char *seq)
 {
   unsigned int i=0;
@@ -67,6 +67,8 @@ unsigned int hashVal(char *seq)
   return val;
 }
 
+// 没有用到，应该是废弃了
+// 取seq的前WINDOW_SIZE位进行运算，转化为unsigned int存在hash_key中，N_site保存在第几位出现非ACGT字符
 int  hashVal_EN(char *seq,unsigned int *N_site,unsigned int *hash_key)
 {
   unsigned int i=0;
@@ -99,6 +101,8 @@ int  hashVal_EN(char *seq,unsigned int *N_site,unsigned int *hash_key)
     *hash_key=val;
 }
 
+// 没有用到，应该是废弃了
+// 待看
 void add_hashVal(char *seq,unsigned int *N_site,unsigned int *hash_key)
 {
     unsigned int mask=(unsigned int)-1;
@@ -131,6 +135,8 @@ void add_hashVal(char *seq,unsigned int *N_site,unsigned int *hash_key)
 	}
 }
 
+// 将参考基因组的一些信息写到文件中
+// 染色体数目 + 每个染色体信息(染色体名长度，染色体名，染色体长度) + 基因组长度
 void initSavingIHashTable(char *fileName, bitmapper_bs_iter reference_length, _rg_name_l **refChromeName1,
 	bitmapper_bs_iter refChromeCont)
 {
@@ -331,6 +337,7 @@ inline int check_CHG_index(bitmapper_bs_iter ref_pos, bitmapper_bs_iter chrome_m
 
 
 ///返回值0是CpG, 返回值1是CHG, 返回值2是CHH，返回值3什么都不是
+// 设计的返回值有问题，应该返回什么都不是为0
 inline int get_context_index(bitmapper_bs_iter map_location, char* ref_genome, _rg_name_l **refChromeName1,
 	bitmapper_bs_iter refChromeCont, int* current_chrome_id)
 {
@@ -343,7 +350,8 @@ inline int get_context_index(bitmapper_bs_iter map_location, char* ref_genome, _
 	int current_context;
 
 	
-
+	// 通过map_location找到current_chrome_id属于第几个染色体
+	// 根据是否处于某染色体的start_location和end_location之间判断
 	for (; (*current_chrome_id) < refChromeCont; ++(*current_chrome_id))
 	{
 		if ((map_location >= (*refChromeName1)[(*current_chrome_id)].start_location) 
@@ -352,6 +360,8 @@ inline int get_context_index(bitmapper_bs_iter map_location, char* ref_genome, _
 			break;
 	}
 
+	// 默认current_chrome_id是逐渐增加的，但也有减少的情况，这里从0开始搜索
+	// 如果refChromeCont很大并且current_chrome_id逐渐增加，不会走到这个循环，能节省很多时间
 	if ((*current_chrome_id) >= refChromeCont)
 	{
 		for ((*current_chrome_id) = 0; (*current_chrome_id) < refChromeCont; ++(*current_chrome_id))
@@ -380,7 +390,8 @@ inline int get_context_index(bitmapper_bs_iter map_location, char* ref_genome, _
 	}
 }
 
-
+// .index.methy 与initSavingIHashTable相似
+// 染色体数目 + 每个染色体信息(染色体名长度，染色体名，染色体长度) + 基因组长度
 void SavingMethyIndex(char *fileName, bitmapper_bs_iter reference_length, _rg_name_l **refChromeName1,
 	bitmapper_bs_iter refChromeCont, char* refGen)
 {
@@ -510,7 +521,7 @@ int refChromeCont, unsigned int reference_length, char** refGen)
     fprintf(stderr, "Write error while saving hash table.\n");
 }
 
-
+// 输入.bs文件，基因组C转T的互补序列和反向互补序列
 void build_inde_from_disk(char* file_name)
 {
 	FILE *f1;
@@ -534,7 +545,7 @@ void build_inde_from_disk(char* file_name)
 
 	char ch;
 	bitmapper_bs_iter text_length = 0;
-
+	// 获取文件中字符数量
 	while (1)
 	{
 		fscanf(f1, "%c", &ch);
@@ -579,7 +590,7 @@ void build_inde_from_disk(char* file_name)
 
 	bitmapper_bs_iter compress_build_sa = 8;
 
-
+	// bwt.cpp
 	indenpendent_creadte_index(text_length, &refer, compress_build_sa, file_name);
 
 
@@ -598,7 +609,7 @@ void generate_directional_BS_genome_to_disk(char* refGen, bitmapper_bs_iter leng
 
 	f1 = fopen(file_name, "w");
 
-
+	// 检查一遍确实没有非ACGTacgt的字符
 	for (i = 0; i < length; ++i)
 	{
 		if (refGen[i] != 'A'&&
@@ -620,7 +631,7 @@ void generate_directional_BS_genome_to_disk(char* refGen, bitmapper_bs_iter leng
 
 
 
-
+	// 没有用dict，直接使用了一个长为256的char list
 	for (i = 0; i < 256; i++)
 	{
 		convert_complement[i] = 'N';
@@ -640,7 +651,7 @@ void generate_directional_BS_genome_to_disk(char* refGen, bitmapper_bs_iter leng
 
 
 	
-
+  // 这里要把C转换成T，为何不在list中写好
 	/********************************************Output complement strand*****************************************/
 	for (i = 0; i < length; ++i)
 	{
@@ -661,7 +672,7 @@ void generate_directional_BS_genome_to_disk(char* refGen, bitmapper_bs_iter leng
 	/********************************************Output complement strand******************************************/
 
 
-
+	// 反向互补链也写到了同一个文件中，这个文件最终会被删除
 	/********************************************Output reverse forward strand****************************************************/
 	for (i = length - 1; i >= 0; --i)
 	{
@@ -693,6 +704,8 @@ void generate_directional_BS_genome_to_disk(char* refGen, bitmapper_bs_iter leng
 
 
 ///把refGen里的N随机转换
+// 非ACGTacgt随机转化为ACGT，对于H之类的简并碱基也是随机转换
+// 设当前时间为种子，每次转换后的基因组不一样，建出来的索引都不一样
 void replace_N(char* refGen, bitmapper_bs_iter length)
 {
 	long long i = 0;
@@ -731,6 +744,7 @@ void replace_N(char* refGen, bitmapper_bs_iter length)
 
 
 ///把refGen转成2-bit编码
+// 保存文件为.index.bs.pac，原始序列的2-bit编码，N已经被随机转化成ACGT
 void convert_to_2bit(char* refGen, bitmapper_bs_iter length, char* file_name)
 {
 	bitmapper_bs_iter i = 0;
@@ -852,20 +866,14 @@ void createIndex(char *fileName, char *indexName)
   fprintf(stderr, "Generating Index from %s \n", fileName);
 	
 
-  if (!reference_length)
-  {
+  if (!reference_length) {
     fprintf(stderr, "The error of Reading Index:\n");
     return;
   }
 
-
-  
-
-
   ///这个函数结束之后，reference_length是真正的基因组长度
+  // Ref_Genome.cpp
   loadRefGenome(&refGen, &refChromeName, &refChromeCont, &reference_length);
-
-
 
   for(i=0;i<refChromeCont;++i)
   {
@@ -896,10 +904,10 @@ void createIndex(char *fileName, char *indexName)
 
   strcpy(command_string + strlen(command_string), file_name);
 
-
+  // 把refGen里的N随机转换
   replace_N(refGen, reference_length);
 
-
+  // .bs文件，应该被删掉了
   generate_directional_BS_genome_to_disk(refGen, reference_length, file_name);
 
 

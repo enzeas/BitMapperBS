@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
   if (!CommandLine_process(argc, argv))
     return 1;
   
-
+  // char fileName[2][NAME_LENGTH]，分别存fa文件和index文件的文件名
   if(is_index)
     {
       createIndex(fileName[0], fileName[1]);

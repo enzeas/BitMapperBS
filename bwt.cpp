@@ -1131,7 +1131,7 @@ unsigned int indenpendent_creadte_index(bitmapper_bs_iter text_length, char** in
 	ctoi['g'] = 2;
 	ctoi['t'] = 1;
 	**/
-
+	// 这里和文章提到的不一样
 	ctoi['A'] = 2;
 	ctoi['G'] = 0;
 	ctoi['T'] = 1;
